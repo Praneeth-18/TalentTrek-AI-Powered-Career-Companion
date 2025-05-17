@@ -1,0 +1,63 @@
+-- Drop resume-related columns
+ALTER TABLE IF EXISTS "users" DROP COLUMN IF EXISTS "resume_text";
+ALTER TABLE IF EXISTS "users" DROP COLUMN IF EXISTS "resume_updated_at";
+ALTER TABLE IF EXISTS "users" DROP COLUMN IF EXISTS "resume_embedding";
+
+-- Update the record_application function
+CREATE OR REPLACE FUNCTION record_application(
+  p_job_listing_id INTEGER, 
+  p_user_id VARCHAR(255), 
+  p_status VARCHAR(50) DEFAULT 'Applied',
+  p_notes TEXT DEFAULT NULL
+)
+RETURNS INTEGER AS $$
+DECLARE
+  v_application_id INTEGER;
+BEGIN
+  -- Check if user_id exists
+  IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id) THEN
+    RAISE EXCEPTION 'User with ID % not found', p_user_id;
+  END IF;
+  
+  -- Check if application already exists
+  SELECT id INTO v_application_id 
+  FROM user_applications 
+  WHERE job_listing_id = p_job_listing_id AND user_id = p_user_id;
+  
+  IF v_application_id IS NOT NULL THEN
+    RETURN v_application_id; -- Return existing application ID
+  END IF;
+  
+  -- Insert new application
+  INSERT INTO user_applications (
+    job_listing_id, 
+    user_id, 
+    current_status, 
+    notes,
+    applied_at,
+    updated_at
+  ) VALUES (
+    p_job_listing_id,
+    p_user_id,
+    p_status,
+    p_notes,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ) RETURNING id INTO v_application_id;
+  
+  -- Add initial status history record
+  INSERT INTO application_status_history (
+    user_application_id,
+    status,
+    notes,
+    changed_at
+  ) VALUES (
+    v_application_id,
+    p_status,
+    p_notes,
+    CURRENT_TIMESTAMP
+  );
+  
+  RETURN v_application_id;
+END;
+$$ LANGUAGE plpgsql; 

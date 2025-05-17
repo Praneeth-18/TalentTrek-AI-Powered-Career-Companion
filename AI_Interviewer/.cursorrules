@@ -1,0 +1,60 @@
+{
+  "project": {
+    "name": "AI-Interviewer-Backend",
+    "description": "A Flask-based backend for a professional mock interview platform with AI-powered interview responses",
+    "version": "1.0.0"
+  },
+  "code": {
+    "style": {
+      "indentation": "4 spaces",
+      "line_length": 100,
+      "docstrings": "Google style",
+      "imports": {
+        "format": "grouped",
+        "order": ["standard_library", "third_party", "local"]
+      }
+    },
+    "conventions": {
+      "naming": {
+        "classes": "PascalCase",
+        "functions": "snake_case",
+        "variables": "snake_case",
+        "constants": "UPPER_SNAKE_CASE"
+      },
+      "architecture": {
+        "pattern": "flask_blueprint",
+        "file_organization": "by_feature"
+      }
+    }
+  },
+  "features": {
+    "mock_interview": {
+      "description": "API endpoints for managing mock interview sessions",
+      "main_files": ["api/routes/mock_interview.py"],
+      "related_files": [
+        "api/utils/deepseek_client.py",
+        "api/utils/dynamodb.py",
+        "api/utils/interview_evaluator.py",
+        "api/utils/transcription.py"
+      ]
+    },
+    "database": {
+      "description": "DynamoDB integration with local fallback",
+      "main_files": ["api/utils/dynamodb.py"]
+    },
+    "ai_integration": {
+      "description": "Integration with DeepSeek AI for interview responses and evaluation",
+      "main_files": ["api/utils/deepseek_client.py", "api/utils/interview_evaluator.py"]
+    }
+  },
+  "dependencies": {
+    "python": "3.11",
+    "primary": ["Flask", "boto3", "Werkzeug", "python-dotenv", "requests"]
+  },
+  "best_practices": {
+    "error_handling": "Use try-except blocks with specific exceptions",
+    "logging": "Use Python's built-in logging module",
+    "environment": "Use python-dotenv for environment variables",
+    "security": "Sanitize inputs, use HTTPS, practice principle of least privilege"
+  }
+}

@@ -1,0 +1,64 @@
+                                                                                                array_to_string                                                                                                
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ CREATE OR REPLACE FUNCTION public.record_application(p_job_listing_id integer, p_user_id character varying, p_status character varying DEFAULT 'Applied'::character varying, p_notes text DEFAULT NULL::text)+
+  RETURNS integer                                                                                                                                                                                             +
+  LANGUAGE plpgsql                                                                                                                                                                                            +
+ AS $function$                                                                                                                                                                                                +
+       DECLARE                                                                                                                                                                                                +
+         v_application_id INTEGER;                                                                                                                                                                            +
+       BEGIN                                                                                                                                                                                                  +
+         -- Check if user_id exists                                                                                                                                                                           +
+         IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id) THEN                                                                                                                                        +
+           RAISE EXCEPTION 'User with ID % not found', p_user_id;                                                                                                                                             +
+         END IF;                                                                                                                                                                                              +
+                                                                                                                                                                                                              +
+         -- Check if application already exists                                                                                                                                                               +
+         SELECT id INTO v_application_id                                                                                                                                                                      +
+         FROM user_applications                                                                                                                                                                               +
+         WHERE job_listing_id = p_job_listing_id AND user_id = p_user_id;                                                                                                                                     +
+                                                                                                                                                                                                              +
+         IF v_application_id IS NOT NULL THEN                                                                                                                                                                 +
+           RETURN v_application_id; -- Return existing application ID                                                                                                                                         +
+         END IF;                                                                                                                                                                                              +
+                                                                                                                                                                                                              +
+         -- Insert new application                                                                                                                                                                            +
+         INSERT INTO user_applications (                                                                                                                                                                      +
+           job_listing_id,                                                                                                                                                                                    +
+           user_id,                                                                                                                                                                                           +
+           current_status,                                                                                                                                                                                    +
+           notes,                                                                                                                                                                                             +
+           applied_at,                                                                                                                                                                                        +
+           updated_at                                                                                                                                                                                         +
+         ) VALUES (                                                                                                                                                                                           +
+           p_job_listing_id,                                                                                                                                                                                  +
+           p_user_id,                                                                                                                                                                                         +
+           p_status,                                                                                                                                                                                          +
+           p_notes,                                                                                                                                                                                           +
+           CURRENT_TIMESTAMP,                                                                                                                                                                                 +
+           CURRENT_TIMESTAMP                                                                                                                                                                                  +
+         ) RETURNING id INTO v_application_id;                                                                                                                                                                +
+                                                                                                                                                                                                              +
+         -- Add initial status history record (if not already added by the API)                                                                                                                               +
+         IF NOT EXISTS (                                                                                                                                                                                      +
+           SELECT 1 FROM application_status_history                                                                                                                                                           +
+           WHERE user_application_id = v_application_id                                                                                                                                                       +
+         ) THEN                                                                                                                                                                                               +
+           INSERT INTO application_status_history (                                                                                                                                                           +
+             user_application_id,                                                                                                                                                                             +
+             status,                                                                                                                                                                                          +
+             notes,                                                                                                                                                                                           +
+             changed_at                                                                                                                                                                                       +
+           ) VALUES (                                                                                                                                                                                         +
+             v_application_id,                                                                                                                                                                                +
+             p_status,                                                                                                                                                                                        +
+             p_notes,                                                                                                                                                                                         +
+             CURRENT_TIMESTAMP                                                                                                                                                                                +
+           );                                                                                                                                                                                                 +
+         END IF;                                                                                                                                                                                              +
+                                                                                                                                                                                                              +
+         RETURN v_application_id;                                                                                                                                                                             +
+       END;                                                                                                                                                                                                   +
+       $function$                                                                                                                                                                                             +
+ 
+(1 row)
+
