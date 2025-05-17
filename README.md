@@ -68,8 +68,8 @@ A comprehensive job portal application with job listings, application tracking, 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/Job-Portal-with-Resume-Customization.git
-cd Job-Portal-with-Resume-Customization
+git clone https://github.com/Praneeth-18/TalentTrek-AI-Powered-Career-Companion.git
+cd TalentTrek-AI-Powered-Career-Companion
 ```
 
 ### Environment Setup
