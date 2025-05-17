@@ -2,7 +2,9 @@
 
 A comprehensive job portal application with job listings, application tracking, AWS Cognito authentication, AI-powered resume customization features, and an AI-powered mock interview platform.
 
-[TalentTrek Project Presentation Slides](TalentTrek%20Project%20Presentation.pptx)
+[YouTube Demo Video](https://youtu.be/XoBCiAksn98)
+
+[TalentTrek Project Presentation Slides](https://www.slideshare.net/slideshow/s10-talenttrek-project-presentation-slides/279228583)
 
 ## 🌟 Features
 
